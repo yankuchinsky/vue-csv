@@ -104,9 +104,11 @@ export default {
 			const file = event.target.files[0]
 			const reader = new FileReader()
 			const data = []
+			const fileTypeArray = file.name.split('').reverse()
+			const fileType = fileTypeArray.splice(0, fileTypeArray.indexOf('.')).reverse().join('')
 			reader.onload = event => {
 				const fileString = event.target.result
-				if(file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'){
+				if(fileType === 'xlsx'){
 					readXlsxFile(file).then(data => {
 						this.headers = data.shift()
 						this.content = data
@@ -116,7 +118,7 @@ export default {
 						}
 					})
 				}
-				if(file.type === 'text/csv'){
+				if(file.type === 'csv'){
 					csvtojson({noheader:true})
 						.fromString(fileString)
 						.on('csv', jsonObject => {

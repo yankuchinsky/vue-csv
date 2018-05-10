@@ -48,6 +48,7 @@
 				</div>
 			</div>
 			<div
+				class="column-top"
 				v-if="mode[columnKey] === 'pending'"
 				>
 				<div class="column-header">
@@ -146,11 +147,12 @@ export default {
 <style lang="sass" scoped>
 .wrapper
 .row
-	padding: 5px
+	padding: 3px
 	text-align: left
+	font-size: 14px
 .column
-	width: 200px
-	height: 300px
+	width: 240px
+	//min-height: 300px
 	display: inline-block
 	position: relative
 	vertical-align: top
@@ -183,13 +185,17 @@ export default {
 	.column-header
 		font-size: 18px	
 		//border-bottom: 1px solid #eeeeee
+.column-top
+	height: 160px
 .column-content
-	position: absolute
-	width: 200px
+	//position: absolute
+	//width: 200px
 	bottom: 0
 .column-buttons
 	width: 200px
-	margin-top: 20px
+	margin:
+		top: 20px
+		bottom: 20px
 	.column-button
 		display: inline-block
 		cursor: pointer

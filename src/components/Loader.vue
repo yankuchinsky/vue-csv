@@ -175,6 +175,9 @@ export default {
 </script>
 <style lang="sass" scoped>
 .wrapper
+	width: auto
+	overflow-x: scroll
+	white-space: nowrap
 .row
 	padding: 3px
 	text-align: left

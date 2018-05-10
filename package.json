@@ -11,6 +11,7 @@
     "build": "cross-env NODE_ENV=production webpack --progress --hide-modules"
   },
   "dependencies": {
+    "read-excel-file": "^1.2.8",
     "vue": "^2.5.11"
   },
   "browserslist": [

@@ -27,18 +27,28 @@
 				</select>
 				<div v-if="selectColumnName[columnKey] === 'newColumn'">
 					<input class="form-element" type="text" v-model="newColumnName[columnKey]">
+					<select class="column-select form-element" v-model="columnFieldType[columnKey]">
+						<option v-for="(type, fieldKey) in fieldTypes" :key="fieldKey">{{type}}</option>
+					</select>
 				</div>
-				<select class="column-select form-element" v-model="columnFieldType[columnKey]">
-					<option v-for="(type, fieldKey) in fieldTypes" :key="fieldKey">{{type}}</option>
-				</select>
 				<div class="column-buttons">
-					<div class="column-button column-button__save" @click="save(columnKey)">save</div>
-					<div v-if="columnKey > 0" class="column-button column-button__skip" @click="cancel(columnKey)">back</div>
-					<div v-if="columnKey === 0" class="column-button column-button__skip" @click="cancel(columnKey)">cancel</div>
+					<div class="column-button column-button__button" @click="save(columnKey)">save</div>
+					<div v-if="columnKey > 0" class="column-button column-button__button" @click="cancel(columnKey)">back</div>
+					<div class="column-button column-button__skip" @click="skip(columnKey)">skip</div>
 				</div>
 			</div>
 			<div 
 				v-if="mode[columnKey] === 'saved'"
+				class="column-top column-top-saved"
+				>
+				<div class="column-header">
+					Column {{newColumnName[columnKey]}}
+					<br>
+					field type {{columnFieldType[columnKey]}}
+				</div>
+			</div>
+			<div 
+				v-if="mode[columnKey] === 'skiped'"
 				class="column-top column-top-saved"
 				>
 				<div class="column-header">
@@ -52,11 +62,13 @@
 				v-if="mode[columnKey] === 'pending'"
 				>
 				<div class="column-header">
-					Unnamed column
+					Unnamed
+					<br>
+					Unmached collumn
 				</div>
 				<div class="column-buttons">
-					<div class="column-button column-button__save">edit</div>
-					<div class="column-button column-button__skip">skip</div>
+					<div v-if="mode[columnKey] === 'edit'" class="column-button column-button__button">edit</div>
+					<div v-if="mode[columnKey] === 'edit'" class="column-button column-button__skip">skip</div>
 				</div>
 			</div>
 			<div class="column-content">
@@ -72,6 +84,7 @@
 
 <script>
 import csvtojson from'csvtojson'
+import readXlsxFile from 'read-excel-file'
 export default {
   data () {
     return {
@@ -93,7 +106,18 @@ export default {
 			const data = []
 			reader.onload = event => {
 				const fileString = event.target.result
-				csvtojson({noheader:true})
+				if(file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'){
+					readXlsxFile(file).then(data => {
+						this.headers = data.shift()
+						this.content = data
+						this.mode[0] = 'edit'
+						for(let i=1; i<this.headers.length; i++){
+							this.mode[i] = 'pending'
+						}
+					})
+				}
+				if(file.type === 'text/csv'){
+					csvtojson({noheader:true})
 						.fromString(fileString)
 						.on('csv', jsonObject => {
 							data.push(jsonObject)
@@ -107,8 +131,9 @@ export default {
 								this.mode[i] = 'pending'
 							}
 						})
+				}	
 			}
-			reader.readAsText(file)
+			reader.readAsText(file)	
 		},
 		save(id){
 			let name = ''
@@ -139,7 +164,9 @@ export default {
 			this.$forceUpdate()
 		},
 		skip(id){
-
+			this.mode[id] = 'skiped'
+			this.mode[id+1] = 'edit'
+			this.$forceUpdate()
 		}
 	}
 }
@@ -161,6 +188,7 @@ export default {
 		border: 2px solid #0000ff
 		.row
 			background-color: lighten(#0000ff, 30)
+			border-top: 1px solid #0000ff
 		.row-header
 			background-color: lighten(#0000ff, 10)
 	&__pending
@@ -168,24 +196,27 @@ export default {
 		.row
 			background-color: lighten(#ff0000, 30)
 			border-top: 1px solid #ff000
+			border-top: 1px solid #ff0000
 		.row-header
 			background-color: lighten(#ff0000, 10)
 	&__saved
 		border: 2px solid #ccc
 		.row
 			background-color: #eee
+			border-top: 1px solid #ccc
 		.row-header
 			background-color: #eee
 	&__skiped
-		border: 2px solid #cc0000
+		border: 2px solid #eee
 		.row
-			background-color: transparent //#eee
+			border-top: 1px solid #eee
 		.row-header
-			background-color: transparent //#eee
+			background-color: #eee //#eee
 	.column-header
 		font-size: 18px	
 		//border-bottom: 1px solid #eeeeee
 .column-top
+	margin-top: 10px
 	height: 160px
 .column-content
 	//position: absolute
@@ -199,12 +230,16 @@ export default {
 	.column-button
 		display: inline-block
 		cursor: pointer
-	.column-button__save
+		text-decoration: underline
+		color: #0000ff
+	.column-button__button
+		color: #000
 		border: 1px solid #999999
 		border-radius: 10px
 		padding: 2px 10px
 		border: 1px solid #999
 		background-color: #eee
+		text-decoration: none
 .form-element
 	border: 0
 	border: 1px solid #999

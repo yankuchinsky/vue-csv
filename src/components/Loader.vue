@@ -185,7 +185,6 @@ export default {
 			if(!name){
 				er = 'Set the name of column'
 			}
-			console.log(er)
 			if(!er){
 				this.newColumnName[id] = name
 				this.savedData[id] = {
@@ -230,18 +229,20 @@ export default {
 		},
 		cancel(id){
 			if(id > 0){
-				this.mode[id] = 'pending'
 				this.mode[id-1] = 'edit'
 				this.selectColumnName[id-1] = null
 				this.selectColumnName[id-1] = null
 			}
-			this.savedData[id] = {}
-			this.columnName = null
-			this.selectColumnName[id] = null 
+			if(id < this.headers.length){
+				this.mode[id] = 'pending'
+				this.savedData[id] = {}
+				this.selectColumnName[id] = null 
+			}
 			this.$forceUpdate()
 		},
 		skip(id){
 			this.mode[id] = 'skiped'
+			this.savedData[id] = null
 			if(id + 1 < this.headers.length){
 				this.mode[id+1] = 'edit'
 			}
@@ -251,7 +252,13 @@ export default {
 			})
 		},
 		exportData(){
-			console.log(this.savedData)
+			let result = []
+			this.savedData.forEach(el => {
+				if(el){
+					 result.push(el)
+				}
+			})
+			console.log(result)
 		}
 	}
 }

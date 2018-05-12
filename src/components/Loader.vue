@@ -97,7 +97,6 @@
 		</div>
 	</div>
 </template>
-
 <script>
 import csvtojson from'csvtojson'
 import readXlsxFile from 'read-excel-file'
@@ -117,6 +116,17 @@ export default {
     }
 	},
 	methods: {
+		removeData(){
+			this.headers = []
+			this.content = []
+			this.selectColumnName = []
+			this.newColumnName = []
+			this.editModeOn = 0
+			this.mode = []
+			this.columnFieldType = []
+			this.savedData = []
+			this.done = false
+		},
 		uploadFile(event){
 			const file = event.target.files[0]
 			const reader = new FileReader()
@@ -124,6 +134,7 @@ export default {
 			const fileTypeArray = file.name.split('').reverse()
 			const fileType = fileTypeArray.splice(0, fileTypeArray.indexOf('.')).reverse().join('')
 			reader.onload = event => {
+				this.removeData()
 				const fileString = event.target.result
 				if(fileType === 'xlsx'){
 					readXlsxFile(file).then(data => {
@@ -136,6 +147,7 @@ export default {
 					})
 				}
 				if(fileType === 'csv'){
+					this.removeData()
 					csvtojson({noheader:true})
 						.fromString(fileString)
 						.on('csv', jsonObject => {
